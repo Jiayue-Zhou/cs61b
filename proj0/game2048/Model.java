@@ -138,6 +138,14 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        //int size = b.size();
+        for (int i = 0; i < b.size(); ++i) {
+            for (int j = 0; j < b.size(); ++j) {
+                if (b.tile(i, j) == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +156,14 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        //int size = b.size();
+        for (int i = 0; i < b.size(); ++i) {
+            for (int j = 0; j < b.size(); ++j) {
+                if (b.tile(i, j) != null && b.tile(i, j).value() == MAX_PIECE) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +175,33 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) {
+            return true;
+        }
+        for (int i = 0; i < b.size(); ++i) {
+            for (int j = 0; j < b.size(); ++j) {
+                if (haveAdjEqual(b, i, j)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean haveAdjEqual(Board b, int col, int row) {
+        if (posOk(b,col + 1, row) && b.tile(col, row).value() == b.tile(col + 1, row).value() ||
+                posOk(b,col - 1, row) && b.tile(col, row).value() == b.tile(col - 1, row).value() ||
+                    posOk(b,col, row + 1) && b.tile(col, row).value() == b.tile(col, row + 1).value() ||
+                        posOk(b,col, row - 1) && b.tile(col, row).value() == b.tile(col, row - 1).value()) {
+                    return true;
+        }
+        return false;
+    }
+
+    private static boolean posOk(Board b, int col, int row) {
+        if (col >= 0 && col < b.size() && row >= 0 && row < b.size()) {
+            return true;
+        }
         return false;
     }
 
