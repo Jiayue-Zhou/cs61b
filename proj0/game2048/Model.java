@@ -114,11 +114,98 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+        /* 1. fix board
+         * 2. handle every col
+         * 3. update
+        */
+        //1. fix board
+        board.setViewingPerspective(side);
+
+        //2. handle every col
+        for (int i = 0; i < board.size(); ++i) {
+            boolean flag = handleOneCol(board, i);
+            if (flag) {
+                changed = true;
+            }
+        }
+        //3. update
+/*        for (int c = 0; c < board.size(); c += 1) {
+            for (int r = 0; r < board.size(); r += 1) {
+                Tile t = board.tile(c, r);
+                if (board.tile(c, r) != null) {
+                    board.move(c,3, t);
+                    changed = true;
+                    score += 7;
+                }
+            }
+        }*/
         checkGameOver();
         if (changed) {
             setChanged();
         }
+        board.setViewingPerspective(Side.NORTH);
         return changed;
+    }
+
+    private boolean handleOneCol(Board b, int col) {
+        //b.tile(col, row)
+        //Judge whether the tilt could be merged
+        boolean[] isMerged = new boolean[b.size()];
+        int nullPos = b.size() - 1;
+        int tilePos = -1;
+        boolean flag = false;
+
+        for (int i = b.size() - 1; i >= 0; --i) {
+            Tile tile = b.tile(col, i);
+            if (tile != null) {
+                //Tile tile = findNextPos(b, col, i);
+                if (tilePos == -1) {
+                    if (!sameTile(tile, col, nullPos)) {
+                        b.move(col, nullPos, tile);
+                        flag = true;
+                    }
+                    tilePos = nullPos;
+                    nullPos--;
+                }
+                // tilePos != -1
+                else {
+                    if (!isMerged[tilePos] && b.tile(col, tilePos).value() == tile.value()) {
+                        //if (!sameTile(tile, col, tilePos)) {
+                            b.move(col, tilePos, tile);
+                            flag = true;
+                        //}
+                        isMerged[tilePos] = true;
+                        score += b.tile(col, tilePos).value();
+                        //To do update merge
+                    }
+                    // b.tile(col, tilePos).value() != tile.value()
+                    else {
+                        //if (!sameTile(tile, col, nullPos)) {
+                            b.move(col, nullPos, tile);
+                            flag = true;
+                        //}
+                        tilePos = nullPos;
+                        nullPos--;
+                    }
+                }
+            }
+        }
+        return flag;
+    }
+
+    private boolean sameTile(Tile tile, int col, int row) {
+        int col1 = tile.col();
+        int row1 = tile.row();
+        return (col1 == col && row1 == row);
+    }
+
+    private int findNextNullPos(Board b, int col) {
+        for (int i = b.size() - 1; i >= 0; --i) {
+            if (b.tile(col, i) != null) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /** Checks if the game is over and sets the gameOver variable
